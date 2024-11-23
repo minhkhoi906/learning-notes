@@ -1,52 +1,58 @@
 #pragma once
 
 #include <array>
+#include <cassert>
 
-template <typename T, size_t S> class RingBuffer
+template <typename Type, size_t Size> class RingBuffer
 {
   public:
-    RingBuffer() : m_Head(0), m_Tail(0), m_Full(false) {}
-    constexpr size_t capacity() const { return S; }
-    inline bool isFull() const { return m_Full; }
+    RingBuffer() : m_Head(0), m_Tail(0), m_Full(false){};
+    void push(const Type &val)
+    {
+        if (isFull()) {
+            m_Tail = (m_Tail + 1) % Size;
+        }
 
-    inline bool isEmpty() const { return (!m_Full && (m_Head == m_Tail)); }
-    inline size_t size() const
-    {
-        return (m_Head > m_Tail) ? (m_Head - m_Tail)
-                                 : (capacity() - (m_Tail - m_Head));
-    }
-    // Put data into the buffer
-    void put(const T &val)
-    {
         m_Buffer[m_Head] = val;
-        if (m_Full) {
-            // Overwrite mode: move tail forward when full
-            m_Tail = (m_Tail + 1) % capacity();
-        }
-        m_Head = (m_Head + 1) % capacity();
-        m_Full = (m_Head == m_Tail); // Buffer is full when head catches up to tail
+        m_Head = (m_Head + 1) % Size;
+        m_Full = (m_Head == m_Tail);
     }
-    // Get data from the buffer
-    T get()
+    Type pop()
     {
-        if (isEmpty()) {
-            throw std::out_of_range("Buffer is empty.");
-        }
-        T value = m_Buffer[m_Tail];
-        m_Tail = (m_Tail + 1) % capacity();
-        m_Full = false; // Buffer can't be full after a get operation
-        return value;
-    }
+        assert(!isEmpty());
 
+        Type item = m_Buffer[m_Tail];
+        m_Tail = (m_Tail + 1) % Size;
+        m_Full = false;
+
+        return std::move(item);
+    }
     void reset()
     {
         m_Head = m_Tail = 0;
         m_Full = false;
     }
+    Type &front() const
+    {
+        assert(!isEmpty());
+
+        return m_Buffer[m_Tail];
+    }
+    bool isEmpty() const { return (!m_Full && (m_Head == m_Tail)); }
+    bool isFull() const { return m_Full; }
+    size_t capacity() const { return Size; }
+    size_t size() const
+    {
+        if (isFull()) {
+            return Size;
+        }
+
+        return (m_Head >= m_Tail) ? m_Head - m_Tail : Size - (m_Tail - m_Head);
+    }
 
   private:
-    std::array<T, S> m_Buffer;
-    size_t m_Head; // Index of the newest element
-    size_t m_Tail; // Index of the oldest element
-    bool m_Full;   // Flag to indicate if buffer is full
+    Type m_Buffer[Size];
+    size_t m_Head; // The next item of buffer
+    size_t m_Tail; // The oldest item of buffer
+    bool m_Full;
 };
