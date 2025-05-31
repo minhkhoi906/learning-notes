@@ -1,49 +1,57 @@
 #pragma once
 
-#include <utility>
-
-template <typename T> struct UniquePtr {
-    explicit UniquePtr(T *point = nullptr) noexcept : m_ptr(point) {}
-    ~UniquePtr() { delete m_ptr; }
-
-    // Delete copy constructor and copy assignment
-    UniquePtr(const UniquePtr &) = delete;
-    UniquePtr &operator=(const UniquePtr &) = delete;
-
+template <typename Type> struct UniquePtr {
+    // Default constructor
+    UniquePtr() noexcept : m_ptr(nullptr) {}
+    // Paremeterized constructor
+    explicit UniquePtr(Type *ptr) noexcept : m_ptr(ptr) {}
+    // Copy constructor
+    UniquePtr(const UniquePtr &other) = delete; // Disable copy constructor
     // Move constructor
-    UniquePtr(UniquePtr &&other) : m_ptr(other.m_ptr) { other.m_ptr = nullptr; }
-    // Move assignment
-    UniquePtr &operator=(UniquePtr &&other)
+    UniquePtr(UniquePtr &&other) noexcept : m_ptr(other.m_ptr)
+    {
+        other.m_ptr = nullptr; // Reset moved-from object
+    }
+    // Copy assignment operator
+    UniquePtr &
+    operator=(const UniquePtr &other) = delete; // Disable copy assignment operator
+    // Move assigment operator
+    UniquePtr &operator=(UniquePtr &&other) noexcept
     {
         if (this != &other) {
             delete m_ptr;
-            m_ptr = other.m_ptr;
-            other.m_ptr = nullptr;
+            m_ptr = other.m_ptr;   // Transfer ownership
+            other.m_ptr = nullptr; // Reset moved-from object
         }
 
         return *this;
     }
-
-    T *release()
+    // Destructor
+    ~UniquePtr()
     {
-        T *temp = m_ptr;
-        m_ptr = nullptr;
-        return temp;
+        delete m_ptr;    // Delete the managed object
+        m_ptr = nullptr; // Avoid dangling pointer
     }
 
-    void reset(T *pointer = nullptr)
+    Type &operator*() const { return *m_ptr; }
+    Type *operator->() const { return m_ptr; }
+
+    // Check if the pointer is not null
+    explicit operator bool() const { return m_ptr != nullptr; }
+    // Get the raw pointer
+    Type *get() const { return m_ptr; }
+    void reset(Type *ptr = nullptr)
     {
-        delete m_ptr;
-        m_ptr = pointer;
+        delete m_ptr; // Delete the current object
+        m_ptr = ptr;  // Assign new pointer
     }
-
-    T *get() const { return m_ptr; }
-
-    T &operator*() const { return *m_ptr; }
-    T *operator->() const { return m_ptr; }
-
-    explicit operator bool() const noexcept { return m_ptr != nullptr; }
+    Type *release()
+    {
+        Type *temp = m_ptr; // Store current pointer
+        m_ptr = nullptr;    // Reset managed pointer
+        return temp;        // Return the old pointer
+    }
 
   private:
-    T *m_ptr;
+    Type *m_ptr; // Pointer to the managed object
 };

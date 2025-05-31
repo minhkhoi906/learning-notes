@@ -72,6 +72,16 @@ TEST(UniquePtrTest, Get)
     EXPECT_EQ(ptr.get()->value, 40);
 }
 
+// Test bool conversion operator
+TEST(UniquePtrTest, BoolConversion)
+{
+    UniquePtr<TestObject> ptr(new TestObject(50));
+    EXPECT_TRUE(ptr); // Should be true when not null
+
+    UniquePtr<TestObject> emptyPtr;
+    EXPECT_FALSE(emptyPtr); // Should be false when null
+}
+
 // Test delete on destruction
 struct MockDeleter {
     static bool deleted;
