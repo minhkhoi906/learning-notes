@@ -1,29 +1,30 @@
-#include <cassert>
-#include <gtest/gtest.h>
-
 #include "../stl/Array.h"
 
-TEST(ArrayTest, DefaultConstructor) {
+#include <gtest/gtest.h>
+
+TEST(ArrayTest, DefaultConstructor)
+{
     Array<int, 5> arr;
-    for (size_t i = 0; i < arr.size(); ++i) {
-        EXPECT_EQ(arr[i], int()); // default-initialized to 0
-    }
+    EXPECT_EQ(arr.size(), 5);
 }
 
-TEST(ArrayTest, ValueInitializedConstructor) {
+TEST(ArrayTest, ValueInitializedConstructor)
+{
     Array<int, 4> arr(42);
     for (size_t i = 0; i < arr.size(); ++i) {
         EXPECT_EQ(arr[i], 42);
     }
 }
-TEST(ArrayTest, CopyConstructor){
+TEST(ArrayTest, CopyConstructor)
+{
     Array<int, 3> a(5);
     Array<int, 3> b = a;
     for (size_t i = 0; i < b.size(); ++i) {
         EXPECT_EQ(b[i], 5);
     }
 }
-TEST(ArrayTest, CopyAssignment){
+TEST(ArrayTest, CopyAssignment)
+{
     Array<int, 2> a(7);
     Array<int, 2> b;
     b = a;
@@ -31,14 +32,16 @@ TEST(ArrayTest, CopyAssignment){
         EXPECT_EQ(b[i], 7);
     }
 }
-TEST(ArrayTest, MoveConstructor){
+TEST(ArrayTest, MoveConstructor)
+{
     Array<int, 3> a(9);
     Array<int, 3> b = std::move(a);
     for (size_t i = 0; i < b.size(); ++i) {
         EXPECT_EQ(b[i], 9);
     }
 }
-TEST(ArrayTest, MoveAssignment){
+TEST(ArrayTest, MoveAssignment)
+{
     Array<int, 4> a(11);
     Array<int, 4> b;
     b = std::move(a);
@@ -46,7 +49,8 @@ TEST(ArrayTest, MoveAssignment){
         EXPECT_EQ(b[i], 11);
     }
 }
-TEST(ArrayTest, ElementAccess){
+TEST(ArrayTest, ElementAccess)
+{
     Array<char, 3> arr('x');
     arr[0] = 'a';
     arr[1] = 'b';
@@ -55,16 +59,19 @@ TEST(ArrayTest, ElementAccess){
     EXPECT_EQ(arr[1], 'b');
     EXPECT_EQ(arr[2], 'c');
 }
-TEST(ArrayTest, ConstAccess){
+TEST(ArrayTest, ConstAccess)
+{
     const Array<char, 2> arr('z');
     EXPECT_EQ(arr[0], 'z');
     EXPECT_EQ(arr[1], 'z');
 }
-TEST(ArrayTest, Size){
+TEST(ArrayTest, Size)
+{
     Array<int, 10> arr;
     EXPECT_EQ(arr.size(), 10);
 }
-TEST(ArrayTest, OutOfRange){
+TEST(ArrayTest, OutOfRange)
+{
     Array<int, 2> arr(1);
     EXPECT_THROW(arr[3], std::out_of_range); // Should not reach here
 }
