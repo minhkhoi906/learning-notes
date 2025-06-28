@@ -91,16 +91,9 @@ template <typename Type> struct SharedPtr {
     // release: Decrements ref count, deletes object if count reaches zero.
     void release() noexcept {
         if (m_count) {
-            // Decrement the count using fetch_sub with release memory order.
-            // This ensures all writes to the managed object (by the thread
-            // that is releasing the last reference) are visible before the
-            // counter reaches zero.
             long old_count = m_count->fetch_sub(1, std::memory_order_release);
 
-            if (old_count == 1) { // If old_count was 1, it means it's now 0
-                // Acquire memory order fence to synchronize with the fetch_sub.
-                // This ensures all memory operations by the thread that owned the last reference
-                // are visible *before* deletion proceeds.
+            if (old_count == 1) {
                 std::atomic_thread_fence(std::memory_order_acquire);
 
                 delete m_ptr;
@@ -114,9 +107,6 @@ template <typename Type> struct SharedPtr {
     // add_ref: Increments ref count.
     void add_ref() noexcept {
         if (m_count) {
-            // Increment the count using fetch_add with relaxed memory order.
-            // Relaxed order is sufficient here as no specific synchronization
-            // is needed with other operations beyond ensuring the increment itself is atomic.
             m_count->fetch_add(1, std::memory_order_relaxed);
         }
     }
