@@ -80,6 +80,8 @@ template <typename Type> struct Queue {
             pop();
     }
 
+    Queue front() const { return ; }
+
   private:
     struct Node {
         Type val;
