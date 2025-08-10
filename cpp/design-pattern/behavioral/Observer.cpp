@@ -3,8 +3,8 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
-#include <vector>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -43,10 +43,11 @@ class Product : public ISubject
         lock_guard<mutex> lock(m_mutex);
         // Use std::remove_if with a lambda to find and remove the observer
         auto newEnd = remove_if(m_observers.begin(), m_observers.end(),
-            [&](const weak_ptr<IObserver>& wp) {
-                // Lock the weak_ptr to compare the shared_ptr it holds
-                return wp.lock() == observer;
-            });
+                                [&](const weak_ptr<IObserver> &wp) {
+                                    // Lock the weak_ptr to compare the shared_ptr it
+                                    // holds
+                                    return wp.lock() == observer;
+                                });
         m_observers.erase(newEnd, m_observers.end());
     }
 
@@ -68,7 +69,8 @@ class Product : public ISubject
     }
 
     // Public method to change the price and trigger notification.
-    void changePrice(float price) {
+    void changePrice(float price)
+    {
         cout << "Product price is changing to " << price << endl;
         notify(price);
     }
@@ -77,7 +79,7 @@ class Product : public ISubject
     // Use std::weak_ptr to prevent circular dependencies (e.g., if an observer
     // also held a shared_ptr to the subject).
     vector<weak_ptr<IObserver>> m_observers;
-    
+
     // A mutex to protect the observers vector from concurrent access.
     mutex m_mutex;
 };
@@ -88,8 +90,10 @@ class Shop : public IObserver
   public:
     explicit Shop(const string &name) : price_(0.0), name_(name) {}
 
-    void update(float price) override {
-        cout << "[Observer: " << name_ << "] Received price update: " << price << endl;
+    void update(float price) override
+    {
+        cout << "[Observer: " << name_ << "] Received price update: " << price
+             << endl;
         price_ = price;
     }
 
@@ -113,9 +117,11 @@ int main()
     product.attach(shop1);
     product.attach(shop2);
 
-    // Change the product's price. The notification will happen on a different thread.
+    // Change the product's price. The notification will happen on a different
+    // thread.
     product.changePrice(23.0f);
-    this_thread::sleep_for(chrono::milliseconds(100)); // Give time for async updates to finish.
+    this_thread::sleep_for(
+        chrono::milliseconds(100)); // Give time for async updates to finish.
 
     shop1->showShopInfo();
     shop2->showShopInfo();
