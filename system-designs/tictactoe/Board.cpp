@@ -4,22 +4,36 @@
 #include <iomanip>
 #include <iostream>
 
-Board::Board(int size) : m_size(size), m_EMPTY('-') { reset(); }
-
-int Board::getSize() const { return m_size; }
-
-char Board::getCell(int row, int col) const { return m_grid[row][col]; }
-
-char Board::getEMPTY() const { return m_EMPTY; }
-
-bool Board::isEmpty(int row, int col) const { return m_grid[row][col] == m_EMPTY; }
-
-bool Board::isValidPosition(int row, int col) const
+Board::Board(std::size_t size)
+    : m_size(size), m_grid(size, std::vector<char>(size, EMPTY_CELL))
 {
-    return row >= 0 && row < m_size && col >= 0 && col < m_size;
+    // Constructor body is now empty - initialization done in member initializer list
 }
 
-bool Board::makeMove(int row, int col, char symbol)
+std::size_t Board::getSize() const noexcept { return m_size; }
+
+char Board::getCell(std::size_t row, std::size_t col) const
+{
+    if (!isValidPosition(row, col)) {
+        throw std::out_of_range("Invalid board position");
+    }
+    return m_grid[row][col];
+}
+
+char Board::getEmpty() const noexcept { return EMPTY_CELL; }
+
+bool Board::isEmpty(std::size_t row, std::size_t col) const
+{
+    return isValidPosition(row, col) && m_grid[row][col] == EMPTY_CELL;
+}
+
+bool Board::isValidPosition(std::size_t row, std::size_t col) const noexcept
+{
+    // size_t is unsigned, so no need to check >= 0
+    return row < m_size && col < m_size;
+}
+
+bool Board::makeMove(std::size_t row, std::size_t col, char symbol)
 {
     if (!isValidPosition(row, col) || !isEmpty(row, col)) {
         return false;
@@ -28,88 +42,77 @@ bool Board::makeMove(int row, int col, char symbol)
     return true;
 }
 
-bool Board::isFull() const
+bool Board::isFull() const noexcept
 {
-    for (int i = 0; i < m_size; i++) {
-        for (int j = 0; j < m_size; j++) {
-            if (isEmpty(i, j))
-                return false;
-        }
-    }
-    return true;
+    return std::all_of(m_grid.cbegin(), m_grid.cend(), [](const auto &row) {
+        return std::none_of(row.cbegin(), row.cend(),
+                            [](char cell) { return cell == EMPTY_CELL; });
+    });
 }
 
-bool Board::checkWin(char symbol) const
+bool Board::checkWin(char symbol) const noexcept
 {
     return checkRows(symbol) || checkColumns(symbol) || checkDiagonals(symbol);
 }
 
 void Board::display() const
 {
-    std::cout << "\nCurrent Board:" << std::endl;
-    for (int i = 0; i < m_size; i++) {
-        for (int j = 0; j < m_size; j++) {
-            std::cout << std::setw(3) << m_grid[i][j];
+    std::cout << "\nCurrent Board:\n";
+    for (const auto &row : m_grid) {
+        for (char cell : row) {
+            std::cout << std::setw(3) << cell;
         }
-        std::cout << std::endl;
+        std::cout << '\n';
     }
-    std::cout << std::endl;
+    std::cout << '\n';
 }
 
-void Board::reset() { m_grid.resize(m_size, std::vector<char>(m_size, m_EMPTY)); }
-
-bool Board::checkRows(char symbol) const
+void Board::reset() noexcept
 {
-    for (int i = 0; i < m_size; i++) {
-        bool win = true;
-        for (int j = 0; j < m_size; j++) {
-            if (m_grid[i][j] != symbol) {
-                win = false;
-                break;
-            }
-        }
-        if (win)
+    for (auto &row : m_grid) {
+        std::fill(row.begin(), row.end(), EMPTY_CELL);
+    }
+}
+
+bool Board::checkRows(char symbol) const noexcept
+{
+    return std::any_of(m_grid.cbegin(), m_grid.cend(), [symbol](const auto &row) {
+        return std::all_of(row.cbegin(), row.cend(),
+                           [symbol](char cell) { return cell == symbol; });
+    });
+}
+
+bool Board::checkColumns(char symbol) const noexcept
+{
+    for (std::size_t col = 0; col < m_size; ++col) {
+        if (std::all_of(
+                m_grid.cbegin(), m_grid.cend(),
+                [col, symbol](const auto &row) { return row[col] == symbol; })) {
             return true;
+        }
     }
     return false;
 }
 
-bool Board::checkColumns(char symbol) const
+bool Board::checkDiagonals(char symbol) const noexcept
 {
-    for (int j = 0; j < m_size; j++) {
-        bool win = true;
-        for (int i = 0; i < m_size; i++) {
-            if (m_grid[i][j] != symbol) {
-                win = false;
-                break;
-            }
+    // Check main diagonal (top-left to bottom-right)
+    const bool main_diagonal = [this, symbol]() {
+        for (std::size_t i = 0; i < m_size; ++i) {
+            if (m_grid[i][i] != symbol)
+                return false;
         }
-        if (win)
-            return true;
-    }
-    return false;
-}
+        return true;
+    }();
 
-bool Board::checkDiagonals(char symbol) const
-{
-    // Check main diagonal
-    bool win = true;
-    for (int i = 0; i < m_size; i++) {
-        if (m_grid[i][i] != symbol) {
-            win = false;
-            break;
-        }
-    }
-    if (win)
+    if (main_diagonal)
         return true;
 
-    // Check other diagonal
-    win = true;
-    for (int i = 0; i < m_size; i++) {
+    // Check anti-diagonal (top-right to bottom-left)
+    for (std::size_t i = 0; i < m_size; ++i) {
         if (m_grid[i][m_size - 1 - i] != symbol) {
-            win = false;
-            break;
+            return false;
         }
     }
-    return win;
+    return true;
 }

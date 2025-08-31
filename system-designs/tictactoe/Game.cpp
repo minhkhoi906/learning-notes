@@ -7,7 +7,7 @@
 #include <utility> // For std::pair and std::move
 
 // Game class implementation
-Game::Game(int boardSize) : m_board(boardSize), m_gameOver(false)
+Game::Game(std::size_t boardSize) : m_board(boardSize), m_gameOver(false)
 {
     // Use smart pointers to manage player objects, no manual new/delete.
     p_player1 = std::make_unique<Player>("Human", 'X');
@@ -54,7 +54,7 @@ void Game::play()
     displayResult();
 }
 
-void Game::makeMove(int row, int col)
+void Game::makeMove(std::size_t row, std::size_t col)
 {
     if (!m_board.isValidPosition(row, col) || !m_board.isEmpty(row, col)) {
         std::cout << "Invalid move! Please try again.\n";
@@ -103,14 +103,14 @@ void Game::computerMove()
     makeMove(row, col);
 }
 
-std::pair<int, int> Game::findBestMove() const
+std::pair<std::size_t, std::size_t> Game::findBestMove() const
 {
     int bestScore = std::numeric_limits<int>::min();
-    std::pair<int, int> bestMove = {0, 0};
+    std::pair<std::size_t, std::size_t> bestMove = {0, 0};
 
     // Iterate through all possible moves
-    for (int i = 0; i < m_board.getSize(); ++i) {
-        for (int j = 0; j < m_board.getSize(); ++j) {
+    for (std::size_t i = 0; i < m_board.getSize(); ++i) {
+        for (std::size_t j = 0; j < m_board.getSize(); ++j) {
             if (m_board.isEmpty(i, j)) {
                 // A single copy of the board is passed to the minimax function.
                 Board tempBoard = m_board;
@@ -144,8 +144,8 @@ int Game::minimax(Board board, bool isMax, int depth) const
     int bestScore =
         isMax ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
 
-    for (int i = 0; i < board.getSize(); ++i) {
-        for (int j = 0; j < board.getSize(); ++j) {
+    for (std::size_t i = 0; i < board.getSize(); ++i) {
+        for (std::size_t j = 0; j < board.getSize(); ++j) {
             if (board.isEmpty(i, j)) {
                 board.makeMove(
                     i, j, isMax ? p_player2->getSymbol() : p_player1->getSymbol());
@@ -158,7 +158,7 @@ int Game::minimax(Board board, bool isMax, int depth) const
                 // Undo the move to restore the board state for the next iteration.
                 // Note: a more efficient way to do this is to add an 'undoMove'
                 // function to the Board class.
-                board.makeMove(i, j, m_board.getEMPTY());
+                board.makeMove(i, j, m_board.getEmpty());
             }
         }
     }

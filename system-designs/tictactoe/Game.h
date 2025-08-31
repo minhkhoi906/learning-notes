@@ -22,14 +22,14 @@ class Game
     bool m_gameOver;
 
   public:
-    Game(int boardSize = 3);
+    Game(std::size_t boardSize = 3);
 
     // No need for a custom destructor when using smart pointers.
     // The default destructor will handle cleanup automatically.
     ~Game() = default;
 
     void play();
-    void makeMove(int row, int col);
+    void makeMove(std::size_t row, std::size_t col);
     void switchPlayer();
     void displayResult() const;
     bool isGameOver() const;
@@ -37,7 +37,7 @@ class Game
 
   private:
     void computerMove();
-    std::pair<int, int> findBestMove() const;
+    std::pair<std::size_t, std::size_t> findBestMove() const;
 
     // Updated to take a Board object by value to maintain const correctness.
     int minimax(Board board, bool isMax, int depth) const;

@@ -3,48 +3,38 @@
 
 #include <vector>
 
-// The Board class represents a game board, like for Tic-Tac-Toe.
 class Board
 {
   public:
-    // Explicit constructor to prevent implicit conversions.
-    explicit Board(int size = 3);
-
-    // Modern C++ best practice: The Rule of Zero.
-    // std::vector handles copying, moving, and destruction, so we
-    // don't need to declare our own special member functions.
-    // The compiler-generated ones are sufficient.
+    explicit Board(std::size_t size);
 
     // Accessors for class properties
-    int getSize() const;
-    char getCell(int row, int col) const;
-    char getEMPTY() const;
+    [[nodiscard]] std::size_t getSize() const noexcept;
+    [[nodiscard]] char getCell(std::size_t row, std::size_t col) const;
+    [[nodiscard]] char getEmpty() const noexcept;
 
-    // Check state of the board or a specific cell
-    bool isEmpty(int row, int col) const;
-    bool isValidPosition(int row, int col) const;
-    bool isFull() const;
+    // State queries
+    [[nodiscard]] bool isEmpty(std::size_t row, std::size_t col) const;
+    [[nodiscard]] bool isValidPosition(std::size_t row,
+                                       std::size_t col) const noexcept;
+    [[nodiscard]] bool isFull() const noexcept;
+    [[nodiscard]] bool checkWin(char symbol) const noexcept;
 
-    // Mutator for making a move
-    bool makeMove(int row, int col, char symbol);
-
-    // Win condition check
-    bool checkWin(char symbol) const;
-
-    // Board management
+    // Mutators
+    bool makeMove(std::size_t row, std::size_t col, char symbol);
+    void reset() noexcept;
     void display() const;
-    void reset();
 
   private:
-    // Member variables
-    std::vector<std::vector<char>> m_grid;
-    const int m_size;
-    const char m_EMPTY;
+    static constexpr char EMPTY_CELL = '-';
 
-    // Private helper methods for checking win conditions
-    bool checkRows(char symbol) const;
-    bool checkColumns(char symbol) const;
-    bool checkDiagonals(char symbol) const;
+    std::size_t m_size;
+    std::vector<std::vector<char>> m_grid;
+
+    // Helper methods
+    [[nodiscard]] bool checkRows(char symbol) const noexcept;
+    [[nodiscard]] bool checkColumns(char symbol) const noexcept;
+    [[nodiscard]] bool checkDiagonals(char symbol) const noexcept;
 };
 
 #endif
