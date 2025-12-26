@@ -1,4 +1,4 @@
-#include "../stl/CircularBuffer.h"
+#include "../stl/data-structure/CircularBuffer.h"
 
 #include <gtest/gtest.h>
 

@@ -1,4 +1,4 @@
-#include "../stl/UniquePtr.h"
+#include "../stl/smart-pointers/UniquePtr.h"
 
 #include <gtest/gtest.h>
 

@@ -1,4 +1,4 @@
-#include "../stl/SharedPtr.h"
+#include "../stl/smart-pointers/SharedPtr.h"
 
 #include <gtest/gtest.h>
 

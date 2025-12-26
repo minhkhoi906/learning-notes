@@ -24,7 +24,7 @@ template <typename T> class QueueSafe
     {
         std::unique_lock<std::mutex> unique_guard(m_mutex);
         // Wait until there's an element to pop
-        m_cv.wait(unique_guard, [&] { return !m_buffer.isEmpty(); });
+        m_cv.wait(unique_guard, [&] { return !m_buffer.empty(); });
 
         T front = std::move(m_buffer.front()); // Move the front element
         m_buffer.pop();                        // Remove the front element

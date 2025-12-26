@@ -1,4 +1,4 @@
-#include "../stl/Array.h"
+#include "../stl/data-structure/Array.h"
 
 #include <gtest/gtest.h>
 
